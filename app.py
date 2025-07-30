@@ -58,121 +58,93 @@ st.markdown("""
 # HEADER
 # =======================
 st.markdown('<div class="title">🍱 Aplikasi Prediksi Kalori Makanan</div>', unsafe_allow_html=True)
-st.markdown("Masukkan kandungan gizi makanan untuk memprediksi jumlah **kalori (kkal)** secara otomatis menggunakan AI (LightGBM Model).")
+st.markdown("Masukkan kandungan gizi makanan satu per satu. Setelah mengisi, klik 'Lanjut' untuk ke input berikutnya hingga selesai.")
 st.divider()
 
 # =======================
-# FORM BERTINGKAT (DINAMIS)
+# INPUT SATU PER SATU
 # =======================
-st.markdown('<div class="section-title">📝 Masukkan Data Gizi:</div>', unsafe_allow_html=True)
-
-nutrisi = {}
-form_steps = [
-    ["Lemak Total (g)", "Lemak Jenuh (g)", "Lemak Tak Jenuh Tunggal (g)", "Lemak Tak Jenuh Ganda (g)", "Karbohidrat (g)", "Gula (g)", "Protein (g)", "Serat (g)", "Kolesterol (mg)", "Air (g)", "Natrium (mg)"],
-    ["Vitamin A (IU)", "Vitamin C (mg)", "Vitamin D (mg)", "Vitamin E (mg)", "Vitamin K (mg)", "Vitamin B1 (mg)", "Vitamin B2 (mg)", "Vitamin B3 (mg)", "Vitamin B5 (mg)", "Vitamin B6 (mg)", "Vitamin B11 (mg)", "Vitamin B12 (mg)"],
-    ["Kalsium (mg)", "Zat Besi (mg)", "Kalium (mg)", "Magnesium (mg)", "Zinc (mg)", "Tembaga (mg)", "Mangan (mg)", "Fosfor (mg)", "Selenium (mg)", "Kepadatan Nutrisi"]
+all_features = [
+    "Lemak Total (g)", "Lemak Jenuh (g)", "Lemak Tak Jenuh Tunggal (g)", "Lemak Tak Jenuh Ganda (g)", "Karbohidrat (g)", "Gula (g)", "Protein (g)", "Serat (g)", "Kolesterol (mg)", "Air (g)", "Natrium (mg)",
+    "Vitamin A (IU)", "Vitamin C (mg)", "Vitamin D (mg)", "Vitamin E (mg)", "Vitamin K (mg)", "Vitamin B1 (mg)", "Vitamin B2 (mg)", "Vitamin B3 (mg)", "Vitamin B5 (mg)", "Vitamin B6 (mg)", "Vitamin B11 (mg)", "Vitamin B12 (mg)",
+    "Kalsium (mg)", "Zat Besi (mg)", "Kalium (mg)", "Magnesium (mg)", "Zinc (mg)", "Tembaga (mg)", "Mangan (mg)", "Fosfor (mg)", "Selenium (mg)", "Kepadatan Nutrisi"
 ]
 
-if "current_step" not in st.session_state:
-    st.session_state.current_step = 0
+if "form_index" not in st.session_state:
+    st.session_state.form_index = 0
+if "nutrisi" not in st.session_state:
+    st.session_state.nutrisi = {}
 
-# Navigasi antar langkah
-col_prev, col_next = st.columns([1, 1])
-with col_prev:
-    if st.button("⬅️ Kembali") and st.session_state.current_step > 0:
-        st.session_state.current_step -= 1
-with col_next:
-    if st.button("Lanjut ➡️") and st.session_state.current_step < len(form_steps) - 1:
-        st.session_state.current_step += 1
+current_feature = all_features[st.session_state.form_index]
+with st.form("form_step_input"):
+    value = st.number_input(current_feature, min_value=0.0, step=0.1, key=current_feature)
+    lanjut = st.form_submit_button("➡️ Lanjut")
 
-# Form input data
-with st.form("form_prediksi", clear_on_submit=False):
-    for label in form_steps[st.session_state.current_step]:
-        nutrisi[label] = st.number_input(label, min_value=0.0, step=0.1, key=label)
-    portion = st.number_input("Berat Porsi (g)", min_value=1.0, value=100.0, step=1.0, key="portion")
-    prediksi_btn = st.form_submit_button("🔍 Prediksi Kalori")
-
-# =======================
-# OUTPUT HASIL PREDIKSI
-# =======================
-if prediksi_btn:
-    mapping = {
-        "Lemak Total (g)": "Fat",
-        "Lemak Jenuh (g)": "Saturated Fats",
-        "Lemak Tak Jenuh Tunggal (g)": "Monounsaturated Fats",
-        "Lemak Tak Jenuh Ganda (g)": "Polyunsaturated Fats",
-        "Karbohidrat (g)": "Carbohydrates",
-        "Gula (g)": "Sugars",
-        "Protein (g)": "Protein",
-        "Serat (g)": "Dietary Fiber",
-        "Kolesterol (mg)": "Cholesterol",
-        "Natrium (mg)": "Sodium",
-        "Air (g)": "Water",
-        "Vitamin A (IU)": "Vitamin A",
-        "Vitamin B1 (mg)": "Vitamin B1",
-        "Vitamin B11 (mg)": "Vitamin B11",
-        "Vitamin B12 (mg)": "Vitamin B12",
-        "Vitamin B2 (mg)": "Vitamin B2",
-        "Vitamin B3 (mg)": "Vitamin B3",
-        "Vitamin B5 (mg)": "Vitamin B5",
-        "Vitamin B6 (mg)": "Vitamin B6",
-        "Vitamin C (mg)": "Vitamin C",
-        "Vitamin D (mg)": "Vitamin D",
-        "Vitamin E (mg)": "Vitamin E",
-        "Vitamin K (mg)": "Vitamin K",
-        "Kalsium (mg)": "Calcium",
-        "Tembaga (mg)": "Copper",
-        "Zat Besi (mg)": "Iron",
-        "Magnesium (mg)": "Magnesium",
-        "Mangan (mg)": "Manganese",
-        "Fosfor (mg)": "Phosphorus",
-        "Kalium (mg)": "Potassium",
-        "Selenium (mg)": "Selenium",
-        "Zinc (mg)": "Zinc",
-        "Kepadatan Nutrisi": "Nutrition Density"
-    }
-    input_data = pd.DataFrame([{mapping[k]: v for k, v in nutrisi.items()}])
-    kalori_per_100g = model.predict(input_data)[0]
-    estimasi_kalori = kalori_per_100g * (portion / 100)
-
-    st.markdown('<div class="section-title">📊 Hasil Prediksi:</div>', unsafe_allow_html=True)
-    result_df = pd.DataFrame({
-        "Deskripsi": ["Kalori per 100g", "Berat Porsi (g)", "Estimasi Kalori Total"],
-        "Nilai": [f"{kalori_per_100g:.2f} kkal", f"{portion:.0f} g", f"{estimasi_kalori:.2f} kkal"]
-    })
-    st.table(result_df)
-
-    # Komposisi Makronutrien
-    macro = {
-        "Lemak (g)": nutrisi["Lemak Total (g)"],
-        "Karbohidrat (g)": nutrisi["Karbohidrat (g)"],
-        "Protein (g)": nutrisi["Protein (g)"]
-    }
-    fig, ax = plt.subplots()
-    ax.pie(macro.values(), labels=macro.keys(), autopct="%1.1f%%", startangle=90)
-    ax.axis("equal")
-    st.markdown("#### ⚖️ Komposisi Makronutrien:")
-    st.pyplot(fig)
-
-    # Grafik vitamin & mineral yang tidak nol
-    mikronutrien = {k: v for k, v in nutrisi.items() if ("Vitamin" in k or k in ["Kalsium (mg)", "Zat Besi (mg)", "Magnesium (mg)", "Zinc (mg)"]) and v > 0}
-    if mikronutrien:
-        st.markdown("#### 🧪 Mikronutrien Terkandung:")
-        st.bar_chart(pd.Series(mikronutrien))
-
-    # Tombol Download CSV
-    csv = result_df.to_csv(index=False).encode("utf-8")
-    st.download_button("⬇️ Unduh Hasil (.csv)", data=csv, file_name="hasil_prediksi_kalori.csv", mime="text/csv")
-
-    if kalori_per_100g <= 40:
-        st.info("✅ Kategori: Rendah Kalori (≤ 40 kkal/100g)")
-        st.markdown("💡 **Saran**: Cocok untuk diet rendah kalori atau makanan ringan.")
-    elif kalori_per_100g <= 120:
-        st.warning("⚠️ Kategori: Kalori Sedang (41–120 kkal/100g)")
-        st.markdown("💡 **Saran**: Cocok sebagai makanan utama dengan kandungan kalori seimbang.")
+if lanjut:
+    st.session_state.nutrisi[current_feature] = value
+    if st.session_state.form_index < len(all_features) - 1:
+        st.session_state.form_index += 1
     else:
-        st.error("🚨 Kategori: Kalori Tinggi (> 120 kkal/100g)")
-        st.markdown("💡 **Saran**: Perlu dikonsumsi dengan hati-hati, terutama untuk diet atau penderita penyakit metabolik.")
+        st.success("✅ Semua data berhasil dimasukkan. Siap diprediksi!")
+
+if st.session_state.form_index == len(all_features) - 1:
+    portion = st.number_input("Berat Porsi (g)", min_value=1.0, value=100.0, step=1.0, key="portion")
+    if st.button("🔍 Prediksi Kalori"):
+        nutrisi = st.session_state.nutrisi
+        mapping = {
+            "Lemak Total (g)": "Fat", "Lemak Jenuh (g)": "Saturated Fats", "Lemak Tak Jenuh Tunggal (g)": "Monounsaturated Fats",
+            "Lemak Tak Jenuh Ganda (g)": "Polyunsaturated Fats", "Karbohidrat (g)": "Carbohydrates", "Gula (g)": "Sugars",
+            "Protein (g)": "Protein", "Serat (g)": "Dietary Fiber", "Kolesterol (mg)": "Cholesterol", "Natrium (mg)": "Sodium",
+            "Air (g)": "Water", "Vitamin A (IU)": "Vitamin A", "Vitamin B1 (mg)": "Vitamin B1", "Vitamin B11 (mg)": "Vitamin B11",
+            "Vitamin B12 (mg)": "Vitamin B12", "Vitamin B2 (mg)": "Vitamin B2", "Vitamin B3 (mg)": "Vitamin B3",
+            "Vitamin B5 (mg)": "Vitamin B5", "Vitamin B6 (mg)": "Vitamin B6", "Vitamin C (mg)": "Vitamin C", "Vitamin D (mg)": "Vitamin D",
+            "Vitamin E (mg)": "Vitamin E", "Vitamin K (mg)": "Vitamin K", "Kalsium (mg)": "Calcium", "Tembaga (mg)": "Copper",
+            "Zat Besi (mg)": "Iron", "Magnesium (mg)": "Magnesium", "Mangan (mg)": "Manganese", "Fosfor (mg)": "Phosphorus",
+            "Kalium (mg)": "Potassium", "Selenium (mg)": "Selenium", "Zinc (mg)": "Zinc", "Kepadatan Nutrisi": "Nutrition Density"
+        }
+        input_data = pd.DataFrame([{mapping[k]: v for k, v in nutrisi.items()}])
+        kalori_per_100g = model.predict(input_data)[0]
+        estimasi_kalori = kalori_per_100g * (portion / 100)
+
+        st.markdown('<div class="section-title">📊 Hasil Prediksi:</div>', unsafe_allow_html=True)
+        result_df = pd.DataFrame({
+            "Deskripsi": ["Kalori per 100g", "Berat Porsi (g)", "Estimasi Kalori Total"],
+            "Nilai": [f"{kalori_per_100g:.2f} kkal", f"{portion:.0f} g", f"{estimasi_kalori:.2f} kkal"]
+        })
+        st.table(result_df)
+
+        # Komposisi Makronutrien
+        macro = {
+            "Lemak (g)": nutrisi["Lemak Total (g)"],
+            "Karbohidrat (g)": nutrisi["Karbohidrat (g)"],
+            "Protein (g)": nutrisi["Protein (g)"]
+        }
+        fig, ax = plt.subplots()
+        ax.pie(macro.values(), labels=macro.keys(), autopct="%1.1f%%", startangle=90)
+        ax.axis("equal")
+        st.markdown("#### ⚖️ Komposisi Makronutrien:")
+        st.pyplot(fig)
+
+        # Grafik vitamin & mineral yang tidak nol
+        mikronutrien = {k: v for k, v in nutrisi.items() if ("Vitamin" in k or k in ["Kalsium (mg)", "Zat Besi (mg)", "Magnesium (mg)", "Zinc (mg)"]) and v > 0}
+        if mikronutrien:
+            st.markdown("#### 🧪 Mikronutrien Terkandung:")
+            st.bar_chart(pd.Series(mikronutrien))
+
+        # Tombol Download CSV
+        csv = result_df.to_csv(index=False).encode("utf-8")
+        st.download_button("⬇️ Unduh Hasil (.csv)", data=csv, file_name="hasil_prediksi_kalori.csv", mime="text/csv")
+
+        # Kategori kalori
+        if kalori_per_100g <= 40:
+            st.info("✅ Kategori: Rendah Kalori (≤ 40 kkal/100g)")
+            st.markdown("💡 **Saran**: Cocok untuk diet rendah kalori atau makanan ringan.")
+        elif kalori_per_100g <= 120:
+            st.warning("⚠️ Kategori: Kalori Sedang (41–120 kkal/100g)")
+            st.markdown("💡 **Saran**: Cocok sebagai makanan utama dengan kandungan kalori seimbang.")
+        else:
+            st.error("🚨 Kategori: Kalori Tinggi (> 120 kkal/100g)")
+            st.markdown("💡 **Saran**: Perlu dikonsumsi dengan hati-hati, terutama untuk diet atau penderita penyakit metabolik.")
 
 # =======================
 # FOOTER
