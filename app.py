@@ -25,13 +25,6 @@ st.markdown("""
             text-align:center;
             margin-bottom:25px;
         }
-        .section-title {
-            font-size:24px;
-            font-weight:700;
-            color:#ffffff;
-            margin-top:30px;
-            margin-bottom:15px;
-        }
         .stButton button {
             background-color: #0e76a8;
             color: white;
@@ -58,52 +51,52 @@ st.markdown("""
 # HEADER
 # =======================
 st.markdown('<div class="title">🍱 Aplikasi Prediksi Kalori Makanan</div>', unsafe_allow_html=True)
-st.markdown("Masukkan kandungan gizi makanan satu per satu. Setelah mengisi, klik 'Lanjut' untuk ke input berikutnya hingga selesai.")
+st.markdown("Masukkan data gizi berdasarkan kategori di bawah ini. Setelah mengisi tiap bagian, klik 'Lanjut'.")
 st.divider()
 
 # =======================
-# INPUT SATU PER SATU
+# DEFINISI FORM MULTISTEP
 # =======================
-all_features = [
-    "Lemak Total (g)", "Lemak Jenuh (g)", "Lemak Tak Jenuh Tunggal (g)", "Lemak Tak Jenuh Ganda (g)", "Karbohidrat (g)", "Gula (g)", "Protein (g)", "Serat (g)", "Kolesterol (mg)", "Air (g)", "Natrium (mg)",
-    "Vitamin A (IU)", "Vitamin C (mg)", "Vitamin D (mg)", "Vitamin E (mg)", "Vitamin K (mg)", "Vitamin B1 (mg)", "Vitamin B2 (mg)", "Vitamin B3 (mg)", "Vitamin B5 (mg)", "Vitamin B6 (mg)", "Vitamin B11 (mg)", "Vitamin B12 (mg)",
-    "Kalsium (mg)", "Zat Besi (mg)", "Kalium (mg)", "Magnesium (mg)", "Zinc (mg)", "Tembaga (mg)", "Mangan (mg)", "Fosfor (mg)", "Selenium (mg)", "Kepadatan Nutrisi"
-]
+form_pages = {
+    "Makronutrien": ["Lemak Total (g)", "Lemak Jenuh (g)", "Lemak Tak Jenuh Tunggal (g)", "Lemak Tak Jenuh Ganda (g)", "Karbohidrat (g)", "Gula (g)", "Protein (g)", "Serat (g)"],
+    "Mineral": ["Kolesterol (mg)", "Air (g)", "Natrium (mg)", "Kalsium (mg)", "Zat Besi (mg)", "Kalium (mg)", "Magnesium (mg)", "Zinc (mg)", "Tembaga (mg)", "Mangan (mg)", "Fosfor (mg)", "Selenium (mg)"],
+    "Vitamin": ["Vitamin A (IU)", "Vitamin C (mg)", "Vitamin D (mg)", "Vitamin E (mg)", "Vitamin K (mg)", "Vitamin B1 (mg)", "Vitamin B2 (mg)", "Vitamin B3 (mg)", "Vitamin B5 (mg)", "Vitamin B6 (mg)", "Vitamin B11 (mg)", "Vitamin B12 (mg)"],
+    "Lainnya": ["Kepadatan Nutrisi"]
+}
 
-if "form_index" not in st.session_state:
-    st.session_state.form_index = 0
+form_keys = list(form_pages.keys())
+if "form_step" not in st.session_state:
+    st.session_state.form_step = 0
 if "nutrisi" not in st.session_state:
     st.session_state.nutrisi = {}
 
-current_feature = all_features[st.session_state.form_index]
-st.markdown(f"### Langkah {st.session_state.form_index+1} dari {len(all_features)}")
-st.session_state.nutrisi[current_feature] = st.number_input(
-    current_feature,
-    min_value=0.0,
-    step=0.1,
-    value=st.session_state.nutrisi.get(current_feature, 0.0),
-    key=f"input_{st.session_state.form_index}"
-)
+current_key = form_keys[st.session_state.form_step]
+st.markdown(f"### Langkah {st.session_state.form_step+1} dari {len(form_keys)}: {current_key}")
 
-col1, col2 = st.columns([1, 1])
-with col1:
-    if st.button("⬅️ Kembali", key="btn_kembali"):
-        st.session_state["navigasi"] = "kembali"
-with col2:
-    if st.button("➡️ Lanjut", key="btn_lanjut"):
-        st.session_state["navigasi"] = "lanjut"
+with st.form(f"form_{current_key}"):
+    for kolom in form_pages[current_key]:
+        st.session_state.nutrisi[kolom] = st.number_input(
+            kolom,
+            min_value=0.0,
+            step=0.1,
+            value=st.session_state.nutrisi.get(kolom, 0.0)
+        )
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        kembali = st.form_submit_button("⬅️ Kembali")
+    with col2:
+        lanjut = st.form_submit_button("➡️ Lanjut")
 
-# Navigasi langsung tanggap di luar tombol
-if "navigasi" in st.session_state:
-    if st.session_state.navigasi == "lanjut" and st.session_state.form_index < len(all_features) - 1:
-        st.session_state.form_index += 1
-    elif st.session_state.navigasi == "kembali" and st.session_state.form_index > 0:
-        st.session_state.form_index -= 1
-    del st.session_state["navigasi"]
+if kembali and st.session_state.form_step > 0:
+    st.session_state.form_step -= 1
+elif lanjut and st.session_state.form_step < len(form_keys) - 1:
+    st.session_state.form_step += 1
 
-
-
-if st.session_state.form_index == len(all_features) - 1:
+# =======================
+# FORM FINAL UNTUK PREDIKSI
+# =======================
+if st.session_state.form_step == len(form_keys) - 1:
+    st.markdown("---")
     portion = st.number_input("Berat Porsi (g)", min_value=1.0, value=100.0, step=1.0, key="portion")
     if st.button("🔍 Prediksi Kalori"):
         nutrisi = st.session_state.nutrisi
@@ -120,7 +113,6 @@ if st.session_state.form_index == len(all_features) - 1:
         }
         input_data = pd.DataFrame([{mapping[k]: v for k, v in nutrisi.items()}])
 
-        # Validasi fitur sesuai urutan model
         expected_features = model.feature_name_
         for feat in expected_features:
             if feat not in input_data.columns:
@@ -137,7 +129,6 @@ if st.session_state.form_index == len(all_features) - 1:
         })
         st.table(result_df)
 
-        # Komposisi Makronutrien
         macro = {
             "Lemak (g)": nutrisi["Lemak Total (g)"],
             "Karbohidrat (g)": nutrisi["Karbohidrat (g)"],
@@ -159,17 +150,14 @@ if st.session_state.form_index == len(all_features) - 1:
         st.markdown("#### ⚖️ Komposisi Makronutrien")
         st.pyplot(fig)
 
-        # Grafik vitamin & mineral yang tidak nol
         mikronutrien = {k: v for k, v in nutrisi.items() if ("Vitamin" in k or k in ["Kalsium (mg)", "Zat Besi (mg)", "Magnesium (mg)", "Zinc (mg)"]) and v > 0}
         if mikronutrien:
             st.markdown("#### 🧪 Mikronutrien Terkandung")
             st.bar_chart(pd.Series(mikronutrien))
 
-        # Tombol Download CSV
         csv = result_df.to_csv(index=False).encode("utf-8")
         st.download_button("⬇️ Unduh Hasil (.csv)", data=csv, file_name="hasil_prediksi_kalori.csv", mime="text/csv")
 
-        # Kategori kalori
         if kalori_per_100g <= 40:
             st.info("✅ Kategori: Rendah Kalori (≤ 40 kkal/100g)")
             st.markdown("💡 **Saran**: Cocok untuk diet rendah kalori atau makanan ringan.")
