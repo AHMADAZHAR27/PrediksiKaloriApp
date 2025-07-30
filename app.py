@@ -82,7 +82,7 @@ with st.form("form_step_input"):
         default_value = st.session_state.nutrisi[current_feature]
     else:
         default_value = 0.0
-    value = st.number_input(current_feature, min_value=0.0, step=0.1, value=default_value, key=current_feature)
+    value = st.number_input(current_feature, min_value=0.0, step=0.1, value=default_value)
     col1, col2 = st.columns([1, 1])
     with col1:
         kembali = st.form_submit_button("⬅️ Kembali")
