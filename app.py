@@ -76,6 +76,7 @@ if "nutrisi" not in st.session_state:
     st.session_state.nutrisi = {}
 
 current_feature = all_features[st.session_state.form_index]
+st.markdown(f"### Langkah {st.session_state.form_index+1} dari {len(all_features)}")
 with st.form("form_step_input"):
     if current_feature in st.session_state.nutrisi:
         default_value = st.session_state.nutrisi[current_feature]
