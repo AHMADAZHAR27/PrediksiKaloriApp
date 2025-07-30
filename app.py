@@ -73,26 +73,20 @@ if "nutrisi" not in st.session_state:
 current_key = form_keys[st.session_state.form_step]
 st.markdown(f"### Langkah {st.session_state.form_step+1} dari {len(form_keys)}: {current_key}")
 
-with st.form(f"form_{current_key}", clear_on_submit=False):
-    for kolom in form_pages[current_key]:
-        st.session_state.nutrisi[kolom] = st.number_input(
-            kolom,
-            min_value=0.0,
-            step=0.1,
-            value=st.session_state.nutrisi.get(kolom, 0.0)
-        )
-    col1, col2 = st.columns([1, 1])
-    kembali = col1.form_submit_button("⬅️ Kembali")
-    lanjut = col2.form_submit_button("➡️ Lanjut")
+for kolom in form_pages[current_key]:
+    st.session_state.nutrisi[kolom] = st.number_input(
+        kolom,
+        min_value=0.0,
+        step=0.1,
+        value=st.session_state.nutrisi.get(kolom, 0.0),
+        key=kolom
+    )
 
-    if kembali:
-        if st.session_state.form_step > 0:
-            st.session_state.form_step -= 1
-        st.experimental_rerun()
-    elif lanjut:
-        if st.session_state.form_step < len(form_keys) - 1:
-            st.session_state.form_step += 1
-        st.experimental_rerun()
+col1, col2 = st.columns([1, 1])
+if col1.button("⬅️ Kembali") and st.session_state.form_step > 0:
+    st.session_state.form_step -= 1
+if col2.button("➡️ Lanjut") and st.session_state.form_step < len(form_keys) - 1:
+    st.session_state.form_step += 1
 
 # =======================
 # FORM FINAL UNTUK PREDIKSI
@@ -136,18 +130,20 @@ if st.session_state.form_step == len(form_keys) - 1:
             "Karbohidrat (g)": nutrisi["Karbohidrat (g)"],
             "Protein (g)": nutrisi["Protein (g)"]
         }
-        fig, ax = plt.subplots(figsize=(5, 5))
+        fig, ax = plt.subplots(figsize=(6, 6))
         colors = ['#FF9999', '#66B3FF', '#99FF99']
         wedges, texts, autotexts = ax.pie(
             macro.values(),
             labels=macro.keys(),
-            autopct="%1.1f%%",
+            autopct=lambda pct: f"{pct:.1f}%",
             startangle=90,
             colors=colors,
-            textprops={'fontsize': 10, 'color': 'black'}
+            wedgeprops={"edgecolor": "white", "linewidth": 2},
+            textprops={'fontsize': 11, 'color': 'black'}
         )
         ax.axis("equal")
-        plt.setp(autotexts, size=10, weight="bold")
+        for autotext in autotexts:
+            autotext.set_bbox(dict(boxstyle="circle,pad=0.3", fc="white", ec="black", lw=0.5))
         plt.title("Distribusi Makronutrien", fontsize=14, weight='bold')
         st.markdown("#### ⚖️ Komposisi Makronutrien")
         st.pyplot(fig)
