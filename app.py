@@ -73,7 +73,7 @@ if "nutrisi" not in st.session_state:
 current_key = form_keys[st.session_state.form_step]
 st.markdown(f"### Langkah {st.session_state.form_step+1} dari {len(form_keys)}: {current_key}")
 
-with st.form(f"form_{current_key}"):
+with st.form(f"form_{current_key}", clear_on_submit=False):
     for kolom in form_pages[current_key]:
         st.session_state.nutrisi[kolom] = st.number_input(
             kolom,
@@ -82,15 +82,17 @@ with st.form(f"form_{current_key}"):
             value=st.session_state.nutrisi.get(kolom, 0.0)
         )
     col1, col2 = st.columns([1, 1])
-    with col1:
-        kembali = st.form_submit_button("⬅️ Kembali")
-    with col2:
-        lanjut = st.form_submit_button("➡️ Lanjut")
+    kembali = col1.form_submit_button("⬅️ Kembali")
+    lanjut = col2.form_submit_button("➡️ Lanjut")
 
-if kembali and st.session_state.form_step > 0:
-    st.session_state.form_step -= 1
-elif lanjut and st.session_state.form_step < len(form_keys) - 1:
-    st.session_state.form_step += 1
+    if kembali:
+        if st.session_state.form_step > 0:
+            st.session_state.form_step -= 1
+        st.experimental_rerun()
+    elif lanjut:
+        if st.session_state.form_step < len(form_keys) - 1:
+            st.session_state.form_step += 1
+        st.experimental_rerun()
 
 # =======================
 # FORM FINAL UNTUK PREDIKSI
