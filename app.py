@@ -85,6 +85,7 @@ with st.form("form_step_input"):
         lanjut = st.form_submit_button("➡️ Lanjut")
 
 if kembali and st.session_state.form_index > 0:
+    st.session_state.nutrisi[current_feature] = value
     st.session_state.form_index -= 1
 elif lanjut:
     st.session_state.nutrisi[current_feature] = value
