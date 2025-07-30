@@ -77,29 +77,25 @@ if "nutrisi" not in st.session_state:
 
 current_feature = all_features[st.session_state.form_index]
 st.markdown(f"### Langkah {st.session_state.form_index+1} dari {len(all_features)}")
-with st.form("form_step_input"):
-    if current_feature in st.session_state.nutrisi:
-        default_value = st.session_state.nutrisi[current_feature]
-    else:
-        default_value = 0.0
-    value = st.number_input(current_feature, min_value=0.0, step=0.1, value=default_value)
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        kembali = st.form_submit_button("⬅️ Kembali")
-    with col2:
-        lanjut = st.form_submit_button("➡️ Lanjut")
+st.session_state.nutrisi[current_feature] = st.number_input(
+    current_feature,
+    min_value=0.0,
+    step=0.1,
+    value=st.session_state.nutrisi.get(current_feature, 0.0),
+    key=f"input_{st.session_state.form_index}"
+)
 
-if kembali:
-    st.session_state.nutrisi[current_feature] = value
-    if st.session_state.form_index > 0:
-        st.session_state.form_index -= 1
-elif lanjut:
-    st.session_state.nutrisi[current_feature] = value
-    if st.session_state.form_index < len(all_features) - 1:
-        st.session_state.form_index += 1
-    
-    else:
-        st.success("✅ Semua data berhasil dimasukkan. Siap diprediksi!")
+col1, col2 = st.columns([1, 1])
+with col1:
+    if st.button("⬅️ Kembali"):
+        if st.session_state.form_index > 0:
+            st.session_state.form_index -= 1
+with col2:
+    if st.button("➡️ Lanjut"):
+        if st.session_state.form_index < len(all_features) - 1:
+            st.session_state.form_index += 1
+
+
 
 if st.session_state.form_index == len(all_features) - 1:
     portion = st.number_input("Berat Porsi (g)", min_value=1.0, value=100.0, step=1.0, key="portion")
