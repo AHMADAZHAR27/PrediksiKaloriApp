@@ -144,20 +144,20 @@ if st.session_state.form_index == len(all_features) - 1:
             "Protein (g)": nutrisi["Protein (g)"]
         }
         fig, ax = plt.subplots(figsize=(5, 5))
-    colors = ['#FF9999', '#66B3FF', '#99FF99']
-    wedges, texts, autotexts = ax.pie(
-        macro.values(),
-        labels=macro.keys(),
-        autopct="%1.1f%%",
-        startangle=90,
-        colors=colors,
-        textprops={'fontsize': 10, 'color': 'black'}
-    )
-    ax.axis("equal")
-    plt.setp(autotexts, size=10, weight="bold")
-    plt.title("Distribusi Makronutrien", fontsize=14, weight='bold')
-    st.markdown("#### ⚖️ Komposisi Makronutrien")
-    st.pyplot(fig)
+        colors = ['#FF9999', '#66B3FF', '#99FF99']
+        wedges, texts, autotexts = ax.pie(
+            macro.values(),
+            labels=macro.keys(),
+            autopct="%1.1f%%",
+            startangle=90,
+            colors=colors,
+            textprops={'fontsize': 10, 'color': 'black'}
+        )
+        ax.axis("equal")
+        plt.setp(autotexts, size=10, weight="bold")
+        plt.title("Distribusi Makronutrien", fontsize=14, weight='bold')
+        st.markdown("#### ⚖️ Komposisi Makronutrien")
+        st.pyplot(fig)
 
         # Grafik vitamin & mineral yang tidak nol
         mikronutrien = {k: v for k, v in nutrisi.items() if ("Vitamin" in k or k in ["Kalsium (mg)", "Zat Besi (mg)", "Magnesium (mg)", "Zinc (mg)"]) and v > 0}
