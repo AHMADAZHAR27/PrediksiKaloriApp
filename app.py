@@ -96,7 +96,6 @@ elif lanjut:
     st.session_state.nutrisi[current_feature] = value
     if st.session_state.form_index < len(all_features) - 1:
         st.session_state.form_index += 1
-    st.experimental_rerun()
     else:
         st.success("✅ Semua data berhasil dimasukkan. Siap diprediksi!")
 
