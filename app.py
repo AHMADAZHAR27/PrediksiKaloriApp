@@ -73,24 +73,24 @@ form_steps = [
     ["Kalsium (mg)", "Zat Besi (mg)", "Kalium (mg)", "Magnesium (mg)", "Zinc (mg)", "Tembaga (mg)", "Mangan (mg)", "Fosfor (mg)", "Selenium (mg)", "Kepadatan Nutrisi"]
 ]
 
-current_step = st.session_state.get("current_step", 0)
+if "current_step" not in st.session_state:
+    st.session_state.current_step = 0
+
+# Navigasi antar langkah
+col_prev, col_next = st.columns([1, 1])
+with col_prev:
+    if st.button("⬅️ Kembali") and st.session_state.current_step > 0:
+        st.session_state.current_step -= 1
+with col_next:
+    if st.button("Lanjut ➡️") and st.session_state.current_step < len(form_steps) - 1:
+        st.session_state.current_step += 1
+
+# Form input data
 with st.form("form_prediksi", clear_on_submit=False):
-    for label in form_steps[current_step]:
+    for label in form_steps[st.session_state.current_step]:
         nutrisi[label] = st.number_input(label, min_value=0.0, step=0.1, key=label)
-
     portion = st.number_input("Berat Porsi (g)", min_value=1.0, value=100.0, step=1.0, key="portion")
-
-    col_prev, col_next, col_submit = st.columns([1, 1, 2])
-    with col_prev:
-        if current_step > 0 and st.form_submit_button("⬅️ Kembali"):
-            st.session_state["current_step"] = current_step - 1
-            st.experimental_rerun()
-    with col_next:
-        if current_step < len(form_steps) - 1 and st.form_submit_button("Lanjut ➡️"):
-            st.session_state["current_step"] = current_step + 1
-            st.experimental_rerun()
-    with col_submit:
-        prediksi_btn = st.form_submit_button("🔍 Prediksi Kalori")
+    prediksi_btn = st.form_submit_button("🔍 Prediksi Kalori")
 
 # =======================
 # OUTPUT HASIL PREDIKSI
