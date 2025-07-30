@@ -142,7 +142,7 @@ if prediksi_btn:
     })
     st.table(result_df)
 
-    # Grafik Komposisi Makronutrien
+    # Komposisi Makronutrien
     macro = {
         "Lemak (g)": nutrisi["Lemak Total (g)"],
         "Karbohidrat (g)": nutrisi["Karbohidrat (g)"],
@@ -153,6 +153,16 @@ if prediksi_btn:
     ax.axis("equal")
     st.markdown("#### ⚖️ Komposisi Makronutrien:")
     st.pyplot(fig)
+
+    # Grafik vitamin & mineral yang tidak nol
+    mikronutrien = {k: v for k, v in nutrisi.items() if ("Vitamin" in k or k in ["Kalsium (mg)", "Zat Besi (mg)", "Magnesium (mg)", "Zinc (mg)"]) and v > 0}
+    if mikronutrien:
+        st.markdown("#### 🧪 Mikronutrien Terkandung:")
+        st.bar_chart(pd.Series(mikronutrien))
+
+    # Tombol Download CSV
+    csv = result_df.to_csv(index=False).encode("utf-8")
+    st.download_button("⬇️ Unduh Hasil (.csv)", data=csv, file_name="hasil_prediksi_kalori.csv", mime="text/csv")
 
     if kalori_per_100g <= 40:
         st.info("✅ Kategori: Rendah Kalori (≤ 40 kkal/100g)")
