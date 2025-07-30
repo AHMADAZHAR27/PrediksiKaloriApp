@@ -87,13 +87,19 @@ st.session_state.nutrisi[current_feature] = st.number_input(
 
 col1, col2 = st.columns([1, 1])
 with col1:
-    if st.button("⬅️ Kembali"):
-        if st.session_state.form_index > 0:
-            st.session_state.form_index -= 1
+    if st.button("⬅️ Kembali", key="btn_kembali"):
+        st.session_state["navigasi"] = "kembali"
 with col2:
-    if st.button("➡️ Lanjut"):
-        if st.session_state.form_index < len(all_features) - 1:
-            st.session_state.form_index += 1
+    if st.button("➡️ Lanjut", key="btn_lanjut"):
+        st.session_state["navigasi"] = "lanjut"
+
+# Navigasi langsung tanggap di luar tombol
+if "navigasi" in st.session_state:
+    if st.session_state.navigasi == "lanjut" and st.session_state.form_index < len(all_features) - 1:
+        st.session_state.form_index += 1
+    elif st.session_state.navigasi == "kembali" and st.session_state.form_index > 0:
+        st.session_state.form_index -= 1
+    del st.session_state["navigasi"]
 
 
 
