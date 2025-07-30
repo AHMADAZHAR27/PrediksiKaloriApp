@@ -13,16 +13,40 @@ st.set_page_config(page_title="Prediksi Kalori Makanan", layout="centered")
 model = joblib.load("lightgbm_model.pkl")
 
 # =======================
-# HEADER
+# STYLE TAMBAHAN
 # =======================
 st.markdown("""
     <style>
         .title {
-            font-size:36px;
-            font-weight:bold;
-            color:#1f77b4;
+            font-size:40px;
+            font-weight:800;
+            color:#0e76a8;
             text-align:center;
-            margin-bottom:20px;
+            margin-bottom:25px;
+        }
+        .section-title {
+            font-size:24px;
+            font-weight:700;
+            color:#ffffff;
+            margin-top:30px;
+            margin-bottom:15px;
+        }
+        .stButton button {
+            background-color: #0e76a8;
+            color: white;
+            font-weight: bold;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .stButton button:hover {
+            background-color: #0b5e86;
+        }
+        .stForm {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 12px rgba(0,0,0,0.3);
         }
         .footer {
             position: fixed;
@@ -32,26 +56,21 @@ st.markdown("""
             font-size: 12px;
             color: #888;
         }
-        .stButton button {
-            background-color: #1f77b4;
-            color: white;
-            font-weight: bold;
-            padding: 0.5rem 1.5rem;
-            border-radius: 8px;
-        }
     </style>
 """, unsafe_allow_html=True)
 
+# =======================
+# HEADER
+# =======================
 st.markdown('<div class="title">🍱 Aplikasi Prediksi Kalori Makanan</div>', unsafe_allow_html=True)
 st.markdown("Masukkan kandungan gizi makanan untuk memprediksi jumlah **kalori (kkal)** secara otomatis menggunakan AI (LightGBM Model).")
-
 st.divider()
 
 # =======================
 # FORM INPUT USER
 # =======================
-with st.form("form_prediksi"):
-    st.subheader("📝 Masukkan Data Gizi:")
+st.markdown('<div class="section-title">📝 Masukkan Data Gizi:</div>', unsafe_allow_html=True)
+with st.form("form_prediksi", clear_on_submit=False):
     col1, col2 = st.columns(2)
 
     with col1:
@@ -137,7 +156,7 @@ if prediksi_btn:
     kalori_per_100g = model.predict(input_data)[0]
     estimasi_kalori = kalori_per_100g * (portion / 100)
 
-    st.subheader("🔥 Hasil Prediksi:")
+    st.markdown('<div class="section-title">📊 Hasil Prediksi:</div>', unsafe_allow_html=True)
     st.success(f"Estimasi Kalori: **{estimasi_kalori:.2f} kkal** (untuk {portion}g makanan)")
 
     # Kategori Berdasarkan WHO/FDA (per 100g)
