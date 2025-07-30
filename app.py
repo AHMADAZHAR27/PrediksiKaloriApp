@@ -5,7 +5,7 @@ import joblib
 # =======================
 # CONFIGURASI HALAMAN
 # =======================
-st.set_page_config(page_title="Prediksi Kalori Makanan", layout="centered")
+st.set_page_config(page_title="Prediksi Kalori Makanan", layout="wide")
 
 # =======================
 # MUAT MODEL
@@ -42,12 +42,6 @@ st.markdown("""
         .stButton button:hover {
             background-color: #0b5e86;
         }
-        .stForm {
-            background-color: #1e1e1e;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0px 4px 12px rgba(0,0,0,0.3);
-        }
         .footer {
             position: fixed;
             bottom: 10px;
@@ -71,7 +65,7 @@ st.divider()
 # =======================
 st.markdown('<div class="section-title">📝 Masukkan Data Gizi:</div>', unsafe_allow_html=True)
 with st.form("form_prediksi", clear_on_submit=False):
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
 
     with col1:
         fat = st.number_input("Lemak Total (g)", min_value=0.0, step=0.1)
@@ -83,18 +77,19 @@ with st.form("form_prediksi", clear_on_submit=False):
         protein = st.number_input("Protein (g)", min_value=0.0, step=0.1)
         fiber = st.number_input("Serat (g)", min_value=0.0, step=0.1)
         cholesterol = st.number_input("Kolesterol (mg)", min_value=0.0, step=0.1)
+
+    with col2:
         sodium = st.number_input("Natrium (mg)", min_value=0.0, step=0.1)
         water = st.number_input("Air (g)", min_value=0.0, step=0.1)
         calcium = st.number_input("Kalsium (mg)", min_value=0.0, step=0.1)
         iron = st.number_input("Zat Besi (mg)", min_value=0.0, step=0.1)
-        portion = st.number_input("Berat Porsi (g)", min_value=1.0, value=100.0, step=1.0)
-
-    with col2:
         potassium = st.number_input("Kalium (mg)", min_value=0.0, step=0.1)
         magnesium = st.number_input("Magnesium (mg)", min_value=0.0, step=0.1)
         zinc = st.number_input("Zinc (mg)", min_value=0.0, step=0.1)
         vitamin_a = st.number_input("Vitamin A (IU)", min_value=0.0, step=0.1)
         vitamin_c = st.number_input("Vitamin C (mg)", min_value=0.0, step=0.1)
+
+    with col3:
         vitamin_b1 = st.number_input("Vitamin B1 (mg)", min_value=0.0, step=0.1)
         vitamin_b11 = st.number_input("Vitamin B11 (mg)", min_value=0.0, step=0.1)
         vitamin_b12 = st.number_input("Vitamin B12 (mg)", min_value=0.0, step=0.1)
@@ -110,6 +105,7 @@ with st.form("form_prediksi", clear_on_submit=False):
         phosphorus = st.number_input("Fosfor (mg)", min_value=0.0, step=0.1)
         selenium = st.number_input("Selenium (mg)", min_value=0.0, step=0.1)
         nutrition_density = st.number_input("Kepadatan Nutrisi", min_value=0.0, step=0.1)
+        portion = st.number_input("Berat Porsi (g)", min_value=1.0, value=100.0, step=1.0)
 
     prediksi_btn = st.form_submit_button("🔍 Prediksi Kalori")
 
@@ -157,17 +153,26 @@ if prediksi_btn:
     estimasi_kalori = kalori_per_100g * (portion / 100)
 
     st.markdown('<div class="section-title">📊 Hasil Prediksi:</div>', unsafe_allow_html=True)
-    st.success(f"Estimasi Kalori: **{estimasi_kalori:.2f} kkal** (untuk {portion}g makanan)")
+
+    # Tampilkan hasil dalam bentuk tabel
+    result_df = pd.DataFrame({
+        "Deskripsi": ["Kalori per 100g", "Berat Porsi (g)", "Estimasi Kalori Total"],
+        "Nilai": [f"{kalori_per_100g:.2f} kkal", f"{portion:.0f} g", f"{estimasi_kalori:.2f} kkal"]
+    })
+    st.table(result_df)
 
     # Kategori Berdasarkan WHO/FDA (per 100g)
     if kalori_per_100g <= 40:
         st.info("✅ Kategori: Rendah Kalori (≤ 40 kkal/100g)")
+        st.markdown("💡 **Saran**: Cocok untuk diet rendah kalori atau makanan ringan.")
     elif kalori_per_100g <= 120:
         st.warning("⚠️ Kategori: Kalori Sedang (41–120 kkal/100g)")
+        st.markdown("💡 **Saran**: Cocok sebagai makanan utama dengan kandungan kalori seimbang.")
     else:
         st.error("🚨 Kategori: Kalori Tinggi (> 120 kkal/100g)")
+        st.markdown("💡 **Saran**: Perlu dikonsumsi dengan hati-hati, terutama untuk diet atau penderita penyakit metabolik.")
 
 # =======================
 # FOOTER
 # =======================
-st.markdown('<div class="footer">© 2025 Prediksi Kalori AI. Dibuat dengan ❤️ oleh A. Azhar</div>', unsafe_allow_html=True)
+st.markdown('<div class="footer">© 2025 Prediksi Kalori AI. Dibuat dengan ❤️ oleh A. Azhar .N 22.11.5175</div>', unsafe_allow_html=True)
