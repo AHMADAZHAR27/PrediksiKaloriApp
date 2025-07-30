@@ -103,17 +103,18 @@ if st.session_state.form_index == len(all_features) - 1:
             "Kalium (mg)": "Potassium", "Selenium (mg)": "Selenium", "Zinc (mg)": "Zinc", "Kepadatan Nutrisi": "Nutrition Density"
         }
         input_data = pd.DataFrame([{mapping[k]: v for k, v in nutrisi.items()}])
-        # Validasi fitur sesuai urutan model
-expected_features = model.feature_name_
-for feat in expected_features:
-    if feat not in input_data.columns:
-        input_data[feat] = 0.0
-input_data = input_data[expected_features]
 
-kalori_per_100g = model.predict(input_data)[0]
+        # Validasi fitur sesuai urutan model
+        expected_features = model.feature_name_
+        for feat in expected_features:
+            if feat not in input_data.columns:
+                input_data[feat] = 0.0
+        input_data = input_data[expected_features]
+
+        kalori_per_100g = model.predict(input_data)[0]
         estimasi_kalori = kalori_per_100g * (portion / 100)
 
-        st.markdown('<div class="section-title">📊 Hasil Prediksi:</div>', unsafe_allow_html=True)
+        st.markdown("### 📊 Hasil Prediksi")
         result_df = pd.DataFrame({
             "Deskripsi": ["Kalori per 100g", "Berat Porsi (g)", "Estimasi Kalori Total"],
             "Nilai": [f"{kalori_per_100g:.2f} kkal", f"{portion:.0f} g", f"{estimasi_kalori:.2f} kkal"]
@@ -129,13 +130,13 @@ kalori_per_100g = model.predict(input_data)[0]
         fig, ax = plt.subplots()
         ax.pie(macro.values(), labels=macro.keys(), autopct="%1.1f%%", startangle=90)
         ax.axis("equal")
-        st.markdown("#### ⚖️ Komposisi Makronutrien:")
+        st.markdown("#### ⚖️ Komposisi Makronutrien")
         st.pyplot(fig)
 
         # Grafik vitamin & mineral yang tidak nol
         mikronutrien = {k: v for k, v in nutrisi.items() if ("Vitamin" in k or k in ["Kalsium (mg)", "Zat Besi (mg)", "Magnesium (mg)", "Zinc (mg)"]) and v > 0}
         if mikronutrien:
-            st.markdown("#### 🧪 Mikronutrien Terkandung:")
+            st.markdown("#### 🧪 Mikronutrien Terkandung")
             st.bar_chart(pd.Series(mikronutrien))
 
         # Tombol Download CSV
