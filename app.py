@@ -103,7 +103,14 @@ if st.session_state.form_index == len(all_features) - 1:
             "Kalium (mg)": "Potassium", "Selenium (mg)": "Selenium", "Zinc (mg)": "Zinc", "Kepadatan Nutrisi": "Nutrition Density"
         }
         input_data = pd.DataFrame([{mapping[k]: v for k, v in nutrisi.items()}])
-        kalori_per_100g = model.predict(input_data)[0]
+        # Validasi fitur sesuai urutan model
+expected_features = model.feature_name_
+for feat in expected_features:
+    if feat not in input_data.columns:
+        input_data[feat] = 0.0
+input_data = input_data[expected_features]
+
+kalori_per_100g = model.predict(input_data)[0]
         estimasi_kalori = kalori_per_100g * (portion / 100)
 
         st.markdown('<div class="section-title">📊 Hasil Prediksi:</div>', unsafe_allow_html=True)
