@@ -77,7 +77,11 @@ if "nutrisi" not in st.session_state:
 
 current_feature = all_features[st.session_state.form_index]
 with st.form("form_step_input"):
-    value = st.number_input(current_feature, min_value=0.0, step=0.1, key=current_feature)
+    if current_feature in st.session_state.nutrisi:
+        default_value = st.session_state.nutrisi[current_feature]
+    else:
+        default_value = 0.0
+    value = st.number_input(current_feature, min_value=0.0, step=0.1, value=default_value, key=current_feature)
     col1, col2 = st.columns([1, 1])
     with col1:
         kembali = st.form_submit_button("⬅️ Kembali")
@@ -87,10 +91,12 @@ with st.form("form_step_input"):
 if kembali and st.session_state.form_index > 0:
     st.session_state.nutrisi[current_feature] = value
     st.session_state.form_index -= 1
+    st.experimental_rerun()
 elif lanjut:
     st.session_state.nutrisi[current_feature] = value
     if st.session_state.form_index < len(all_features) - 1:
         st.session_state.form_index += 1
+    st.experimental_rerun()
     else:
         st.success("✅ Semua data berhasil dimasukkan. Siap diprediksi!")
 
