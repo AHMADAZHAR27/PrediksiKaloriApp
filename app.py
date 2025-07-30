@@ -78,9 +78,15 @@ if "nutrisi" not in st.session_state:
 current_feature = all_features[st.session_state.form_index]
 with st.form("form_step_input"):
     value = st.number_input(current_feature, min_value=0.0, step=0.1, key=current_feature)
-    lanjut = st.form_submit_button("➡️ Lanjut")
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        kembali = st.form_submit_button("⬅️ Kembali")
+    with col2:
+        lanjut = st.form_submit_button("➡️ Lanjut")
 
-if lanjut:
+if kembali and st.session_state.form_index > 0:
+    st.session_state.form_index -= 1
+elif lanjut:
     st.session_state.nutrisi[current_feature] = value
     if st.session_state.form_index < len(all_features) - 1:
         st.session_state.form_index += 1
